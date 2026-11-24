@@ -82,11 +82,11 @@
 </header>
 
 <main>
-  <div class="steps"><div id="s1" class="on"></div><div id="s2"></div><div id="s3"></div><div id="s4"></div></div>
+  <div class="steps"><div id="s1" class="on"></div><div id="s2"></div><div id="s3"></div></div>
 
   <!-- STEP 1 基本情報 -->
   <section id="step1">
-    <div class="steplabel">STEP 1 / 4　基本情報を入力</div>
+    <div class="steplabel">STEP 1 / 3　基本情報を入力</div>
     <div class="card">
       <h2>基本情報</h2>
       <form id="form" novalidate>
@@ -173,7 +173,7 @@
 
   <!-- STEP 2 撮影 -->
   <section id="step2" class="hidden">
-    <div class="steplabel">STEP 2 / 4　証明書類を撮影・選択</div>
+    <div class="steplabel">STEP 2 / 3　証明書類を撮影・選択</div>
     <div class="card">
       <h2>証明書類を提出してください</h2>
       <div class="notice">
@@ -205,32 +205,18 @@
       <input type="file" id="fileCapture" accept="image/*" capture="environment" class="hidden">
       <input type="file" id="fileAlbum" accept="image/*" class="hidden">
       <div class="err" id="err2"></div>
-      <button class="btn primary" id="btnScan" disabled>書類を読み取る</button>
+      <button class="btn primary" id="btnScan" disabled>この内容で登録する</button>
       <button class="btn plain" id="back1">← 基本情報に戻る</button>
     </div>
   </section>
 
-  <!-- STEP 3 判定 -->
+  <!-- STEP 3 完了 -->
   <section id="step3" class="hidden">
-    <div class="steplabel">STEP 3 / 4　判定結果を確認</div>
-    <div class="card">
-      <h2>読み取り結果</h2>
-      <div id="results"></div>
-      <p class="note" id="judgeMsg"></p>
-      <details><summary>読み取った文字（確認用）</summary><pre id="ocrText"></pre></details>
-      <div class="err" id="err3"></div>
-      <button class="btn primary" id="btnSubmit">この内容で登録を送信する</button>
-      <button class="btn ghost" id="btnRetake">撮り直す</button>
-    </div>
-  </section>
-
-  <!-- STEP 4 完了 -->
-  <section id="step4" class="hidden">
-    <div class="steplabel">STEP 4 / 4　登録完了</div>
+    <div class="steplabel">STEP 3 / 3　登録完了</div>
     <div class="card done">
       <div class="ic">✅</div>
       <h2>登録が完了しました</h2>
-      <p class="note">ご登録ありがとうございます。担当者より順次ご連絡します。</p>
+      <p class="note">ご登録ありがとうございます。提出いただいた書類はスタッフが確認し、担当者より順次ご連絡します。<br>書類に不備があった場合は、こちらから再提出のご案内をお送りします。</p>
       <button class="btn ghost" id="btnAgain">別の学生を登録する</button>
     </div>
   </section>
@@ -329,7 +315,7 @@ function validate(f) {
 const requiredDocs = () => getForm().delayed ? ['studentId', 'gradProof'] : ['studentId'];
 
 function go(n) {
-  [1,2,3,4].forEach(i => {
+  [1,2,3].forEach(i => {
     $('step' + i).classList.toggle('hidden', i !== n);
     $('s' + i).classList.toggle('on', i <= n);
   });
@@ -441,59 +427,32 @@ $('shutter').onclick = async () => {
   setImage(target, url);
 };
 
-/* STEP2 → 3：読み取り */
-const BADGE = r => r.startsWith('一致') ? 'b-ok' : r === '不一致' ? 'b-ng' : r === '参考' ? 'b-gray' : 'b-warn';
-function resultRow(label, j) {
-  if (!j) return '';
-  return `<div class="result"><div><b>${label}</b><div class="note">${j.note || ''}</div></div><span class="badge ${BADGE(j.result)}">${j.result}</span></div>`;
-}
+/* STEP2 → 3：書類を送信して登録（判定結果は学生に表示せず、スタッフが確認） */
 $('btnScan').onclick = async () => {
   const f = getForm();
+  const msg = validate(f);
+  if (msg) { $('err2').textContent = msg; return; }
   const docs = requiredDocs();
+  if (!docs.every(t => state.images[t])) { $('err2').textContent = '必要な書類をすべて提出してください'; return; }
   const form = { name: f.name, gradYear: f.gradYear, dob: f.dob, delayed: f.delayed };
-  let html = '', texts = '', allOk = true;
+  $('err2').textContent = '';
+  $('btnScan').disabled = true;
   try {
     for (let i = 0; i < docs.length; i++) {
       const t = docs[i];
-      loading(true, `${DOC_LABEL[t]}を読み取り中…（${i + 1}/${docs.length}・10秒ほど）`);
+      if (state.scans[t]) continue; // 送信済みの書類は再送しない（登録だけ失敗した場合の再試行用）
+      loading(true, `${DOC_LABEL[t]}を送信中…（${i + 1}/${docs.length}・10秒ほど）`);
       const res = await api({ action: 'scan', docType: t, image: state.images[t], form });
       state.scans[t] = res.scanId;
-      const j = res.judge;
-      html += `<h3 class="rh">${DOC_LABEL[t]}</h3>`;
-      if (t === 'studentId') html += resultRow('氏名', j.name) + resultRow('生年月日', j.dob) + resultRow('卒業年度', j.grad);
-      else html += resultRow('卒業年度', j.grad) + resultRow('氏名', j.name);
-      Object.values(j).forEach(x => { if (x && !String(x.result).startsWith('一致') && x.result !== '参考') allOk = false; });
-      texts += `【${DOC_LABEL[t]}】\n${res.text || '（文字を読み取れませんでした）'}\n\n`;
     }
-    $('results').innerHTML = html;
-    $('ocrText').textContent = texts;
-    $('judgeMsg').textContent = allOk
-      ? '書類と入力内容が一致しました。'
-      : '自動読み取りは完璧ではありません。「要確認」「不一致」の場合もそのまま送信できますが、後日スタッフが確認し、書類の再提出をお願いすることがあります。入力ミスがあれば戻って修正してください。';
-    $('err3').textContent = '';
+    loading(true, '登録しています…');
+    await api({ action: 'register', scans: state.scans, form: f });
     go(3);
   } catch (err) {
-    $('err2').textContent = '読み取りに失敗しました：' + err.message;
-  } finally { loading(false); }
-};
-$('btnRetake').onclick = () => go(2);
-
-/* STEP3 → 4：登録 */
-$('btnSubmit').onclick = async () => {
-  const f = getForm();
-  const msg = validate(f);
-  if (msg) { $('err3').textContent = msg; return; }
-  if (!requiredDocs().every(t => state.scans[t])) { $('err3').textContent = '書類をもう一度読み取ってください'; return; }
-  $('btnSubmit').disabled = true;
-  loading(true, '送信中…');
-  try {
-    await api({ action: 'register', scans: state.scans, form: f });
-    go(4);
-  } catch (err) {
-    $('err3').textContent = '送信に失敗しました：' + err.message;
+    $('err2').textContent = '送信に失敗しました。通信環境を確認して、もう一度「この内容で登録する」を押してください（' + err.message + '）';
   } finally {
     loading(false);
-    $('btnSubmit').disabled = false;
+    refreshScanBtn();
   }
 };
 
