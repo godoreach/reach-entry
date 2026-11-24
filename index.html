@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>学生登録 | 合同会社Reach</title>
+<style>
+  :root{
+    --navy:#1f2a44; --accent:#2f6bff; --accent-weak:#e9f0ff; --bg:#f5f7fb; --card:#fff;
+    --text:#1b1f29; --muted:#6b7385; --line:#e3e7ef; --ok:#0f9d58; --warn:#e8a200; --ng:#d93025;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;font-size:16px;line-height:1.6}
+  header{background:var(--navy);color:#fff;padding:18px 20px 22px}
+  header .brand{font-size:13px;letter-spacing:.12em;opacity:.8}
+  header h1{margin:4px 0 0;font-size:20px}
+  main{max-width:560px;margin:-12px auto 40px;padding:0 14px}
+  .steps{display:flex;gap:6px;margin:0 0 14px}
+  .steps div{flex:1;height:6px;border-radius:3px;background:#d6dbe6}
+  .steps div.on{background:var(--accent)}
+  .steplabel{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .card{background:var(--card);border-radius:14px;padding:20px 18px;box-shadow:0 2px 10px rgba(20,30,60,.06);margin-bottom:14px}
+  h2{font-size:18px;margin:0 0 14px}
+  label.f{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+  .req{color:var(--ng);font-size:12px;margin-left:4px}
+  .opt{color:var(--muted);font-size:12px;margin-left:4px;font-weight:400}
+  input[type=text],input[type=tel],input[type=email],input[type=date],select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-weak);border-color:var(--accent)}
+  input[readonly]{background:#f2f4f8;color:var(--muted)}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips label{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;font-size:14px;cursor:pointer;background:#fff}
+  .chips input{accent-color:var(--accent)}
+  .btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;font-family:inherit}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.primary:disabled{background:#a9bdf0;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
+  .btn.plain{background:transparent;color:var(--muted)}
+  .consent{font-size:13px;background:#f7f8fb;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:16px}
+  .consent label{display:flex;gap:8px;align-items:flex-start;font-weight:600;margin-top:8px}
+  .consent a{color:var(--accent)}
+  .clist{margin:6px 0 0;padding-left:18px} .clist li{margin:4px 0}
+  .notice{font-size:13px;color:var(--muted);background:#fffaf0;border:1px solid #f3e2b8;border-radius:10px;padding:10px 12px}
+  .preview{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line);display:none}
+  .preview img{display:block;width:100%}
+  .err{color:var(--ng);font-size:13px;margin-top:8px;min-height:1em}
+  .result{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .result:last-of-type{border-bottom:none}
+  .badge{font-weight:700;font-size:13px;padding:4px 10px;border-radius:999px}
+  .b-ok{background:#e6f6ee;color:var(--ok)} .b-gray{background:#eef0f4;color:var(--muted)}
+  .rh{font-size:14px;margin:14px 0 0;color:var(--muted)} .b-warn{background:#fff4d6;color:#a87400} .b-ng{background:#fde8e6;color:var(--ng)}
+  .note{font-size:12px;color:var(--muted)}
+  details{margin-top:10px;font-size:13px} pre{white-space:pre-wrap;word-break:break-all;background:#f7f8fb;padding:10px;border-radius:8px;max-height:200px;overflow:auto}
+  .hidden{display:none!important}
+  .done{text-align:center;padding:30px 10px}
+  .done .ic{font-size:46px}
+  /* ローディング */
+  .loading{position:fixed;inset:0;background:rgba(15,20,35,.55);display:flex;align-items:center;justify-content:center;z-index:50;color:#fff;flex-direction:column;gap:14px;font-size:14px}
+  .spin{width:42px;height:42px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  /* カメラ */
+  .cam{position:fixed;inset:0;background:#000;z-index:40;display:flex;flex-direction:column}
+  .cam video{flex:1;width:100%;object-fit:cover}
+  .cam .frame{position:absolute;left:6%;right:6%;top:50%;transform:translateY(-60%);aspect-ratio:1.586;border:3px solid #fff;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.45)}
+  .cam .tip{position:absolute;top:calc(env(safe-area-inset-top) + 16px);left:0;right:0;text-align:center;color:#fff;font-size:14px}
+  .cam .bar{display:flex;justify-content:space-around;align-items:center;padding:18px 0 calc(env(safe-area-inset-bottom) + 18px);background:#000}
+  .shutter{width:70px;height:70px;border-radius:50%;border:5px solid #fff;background:#fff3;cursor:pointer}
+  .cam .cancel{color:#fff;background:none;border:none;font-size:15px;cursor:pointer}
+  .doc{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px}
+  .doc h3{margin:0 0 4px;font-size:16px}
+  .doc.done{border-color:var(--ok);background:#f6fcf8}
+  .row2{display:flex;gap:8px}
+  .btn.sm{padding:11px 8px;font-size:14px;margin-top:8px}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin:24px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">REACH</div>
+  <h1>学生登録</h1>
+</header>
+
+<main>
+  <div class="steps"><div id="s1" class="on"></div><div id="s2"></div><div id="s3"></div><div id="s4"></div></div>
+
+  <!-- STEP 1 基本情報 -->
+  <section id="step1">
+    <div class="steplabel">STEP 1 / 4　基本情報を入力</div>
+    <div class="card">
+      <h2>基本情報</h2>
+      <form id="form" novalidate>
+        <label class="f">氏名<span class="req">必須</span></label>
+        <input type="text" name="name" placeholder="山田 太郎" autocomplete="name" required>
+
+        <label class="f">フリガナ<span class="req">必須</span></label>
+        <input type="text" name="kana" placeholder="ヤマダ タロウ" required>
+
+        <label class="f">大学名<span class="req">必須</span></label>
+        <input type="text" name="university" placeholder="〇〇大学" required>
+
+        <label class="f">学部・学科<span class="req">必須</span></label>
+        <input type="text" name="faculty" placeholder="経済学部 経済学科" required>
+
+        <label class="f">卒業年度（西暦）<span class="req">必須</span></label>
+        <select name="gradYear" id="gradYear" required></select>
+        <div class="hint">例：2028年3月卒業予定なら「2028」（28卒）</div>
+
+        <label class="f">生年月日<span class="req">必須</span></label>
+        <input type="date" name="dob" required>
+
+        <label class="f">性別<span class="req">必須</span></label>
+        <div class="chips">
+          <label><input type="radio" name="gender" value="男性" required>男性</label>
+          <label><input type="radio" name="gender" value="女性">女性</label>
+          <label><input type="radio" name="gender" value="回答しない">回答しない</label>
+        </div>
+
+        <label class="f">ステータス<span class="opt">（複数選択可）</span></label>
+        <div class="chips" id="status">
+          <label><input type="checkbox" name="status" value="ストレート">ストレート</label>
+          <label><input type="checkbox" name="status" value="浪人">浪人</label>
+          <label><input type="checkbox" name="status" value="留年">留年</label>
+          <label><input type="checkbox" name="status" value="留学">留学</label>
+          <label><input type="checkbox" name="status" value="休学">休学</label>
+          <label><input type="checkbox" name="status" value="院生">院生</label>
+          <label><input type="checkbox" name="status" value="既卒">既卒</label>
+        </div>
+
+        <label class="f">留年・休学・留学などで、卒業時期が入学時の予定より遅くなりましたか？<span class="req">必須</span></label>
+        <div class="chips">
+          <label><input type="radio" name="delayed" value="no">いいえ</label>
+          <label><input type="radio" name="delayed" value="yes">はい（卒業が遅くなった）</label>
+        </div>
+        <div class="hint">「はい」の場合、学生証に加えて<b>卒業年度が分かる書類</b>（留年証明・休学証明、または大学マイページで「〇年3月卒業予定」と表示された画面のスクショ）の提出が必要です。</div>
+
+        <label class="f">電話番号<span class="req">必須</span></label>
+        <input type="tel" name="phone" placeholder="09012345678" inputmode="numeric" autocomplete="tel" required>
+
+        <label class="f">メールアドレス<span class="req">必須</span></label>
+        <input type="email" name="email" placeholder="example@gmail.com" autocomplete="email" required>
+
+        <label class="f">見ている業界<span class="opt">任意</span></label>
+        <input type="text" name="industry" placeholder="IT・コンサル・メーカー など">
+
+        <label class="f">希望勤務地<span class="opt">任意</span></label>
+        <input type="text" name="location" placeholder="東京 など">
+
+        <label class="f">就活で困っていること<span class="opt">任意</span></label>
+        <textarea name="concern" rows="3" placeholder="自由にご記入ください"></textarea>
+
+        <div class="consent">
+          入力いただいた情報および証明書類（学生証等）の画像・確認結果は、運営会社である<b>合同会社Reach</b>が管理し、
+          就職活動支援のため、提携する就活エージェントサービス・就活イベント運営会社に提供することがあります。
+          詳しくは<a href="#" id="termsLink" target="_blank" rel="noopener">利用規約</a>・<a href="#" id="privacyLink" target="_blank" rel="noopener">プライバシーポリシー</a>をご確認ください。
+          <label><input type="checkbox" name="consent" id="consent">個人情報の取り扱いに同意する</label>
+        </div>
+
+        <div class="consent">
+          <b>参加目的の確認</b>
+          <ul class="clist">
+            <li>私は、<b>自身の就職活動のため</b>に、合同会社Reachから案内される就活イベント・就活エージェントとの面談に参加します。</li>
+            <li>参加先では就職活動中の学生として誠実に参加し、虚偽の申告・無断欠席・途中退席をしません。</li>
+            <li>参加先の企業・エージェントから、求人紹介や面談日程の調整など就職活動に関する連絡を受けることがあることを理解しています。</li>
+          </ul>
+          <label><input type="checkbox" name="consentPurpose" id="consentPurpose">上記に同意する</label>
+        </div>
+        <div class="err" id="err1"></div>
+        <button type="submit" class="btn primary">次へ（証明書類の確認へ）</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- STEP 2 撮影 -->
+  <section id="step2" class="hidden">
+    <div class="steplabel">STEP 2 / 4　証明書類を撮影・選択</div>
+    <div class="card">
+      <h2>証明書類を提出してください</h2>
+      <div class="notice">
+        ・平らな場所に置き、明るい場所で撮影<br>
+        ・光の反射・ピンボケに注意<br>
+        ・<b>氏名・生年月日・有効期限（卒業予定）</b>が写るように
+      </div>
+
+      <div class="doc" data-doc="studentId">
+        <h3>① 学生証<span class="req">必須</span></h3>
+        <p class="note">学生証の表面を撮影してください。</p>
+        <div class="row2">
+          <button class="btn primary sm" data-act="camera">📷 ガイド枠で撮影</button>
+          <button class="btn ghost sm" data-act="album">アルバムから選ぶ</button>
+        </div>
+        <div class="preview"><img alt="学生証のプレビュー"></div>
+      </div>
+
+      <div class="doc hidden" data-doc="gradProof" id="proofBlock">
+        <h3>② 卒業年度の証明<span class="req">必須</span></h3>
+        <p class="note">次のいずれか1つ：<br>・留年証明書／休学証明書（休学許可書）<br>・大学マイページで<b>「〇〇年3月卒業予定」と氏名</b>が表示された画面のスクリーンショット</p>
+        <div class="row2">
+          <button class="btn primary sm" data-act="camera">📷 撮影する</button>
+          <button class="btn ghost sm" data-act="album">画像・スクショを選ぶ</button>
+        </div>
+        <div class="preview"><img alt="証明書類のプレビュー"></div>
+      </div>
+
+      <input type="file" id="fileCapture" accept="image/*" capture="environment" class="hidden">
+      <input type="file" id="fileAlbum" accept="image/*" class="hidden">
+      <div class="err" id="err2"></div>
+      <button class="btn primary" id="btnScan" disabled>書類を読み取る</button>
+      <button class="btn plain" id="back1">← 基本情報に戻る</button>
+    </div>
+  </section>
+
+  <!-- STEP 3 判定 -->
+  <section id="step3" class="hidden">
+    <div class="steplabel">STEP 3 / 4　判定結果を確認</div>
+    <div class="card">
+      <h2>読み取り結果</h2>
+      <div id="results"></div>
+      <p class="note" id="judgeMsg"></p>
+      <details><summary>読み取った文字（確認用）</summary><pre id="ocrText"></pre></details>
+      <div class="err" id="err3"></div>
+      <button class="btn primary" id="btnSubmit">この内容で登録を送信する</button>
+      <button class="btn ghost" id="btnRetake">撮り直す</button>
+    </div>
+  </section>
+
+  <!-- STEP 4 完了 -->
+  <section id="step4" class="hidden">
+    <div class="steplabel">STEP 4 / 4　登録完了</div>
+    <div class="card done">
+      <div class="ic">✅</div>
+      <h2>登録が完了しました</h2>
+      <p class="note">ご登録ありがとうございます。担当者より順次ご連絡します。</p>
+      <button class="btn ghost" id="btnAgain">別の学生を登録する</button>
+    </div>
+  </section>
+
+  <footer>© 合同会社Reach</footer>
+</main>
+
+<div class="cam hidden" id="cam">
+  <div class="tip">枠内に学生証を合わせて撮影してください</div>
+  <video id="video" playsinline autoplay muted></video>
+  <div class="frame"></div>
+  <div class="bar">
+    <button class="cancel" id="camCancel">キャンセル</button>
+    <button class="shutter" id="shutter" aria-label="撮影"></button>
+    <span style="width:70px"></span>
+  </div>
+</div>
+
+<div class="loading hidden" id="loading"><div class="spin"></div><div id="loadingText">読み取り中…</div></div>
+
+<script>
+/* ===== 設定（ここだけ書き換え） ===== */
+const CONFIG = {
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbw2w0f3fQ94pCTtROefejOBPY9yrmv5DCEOVRNpFJR3KbdLTVjNViXbKdOxVIaBd2s/exec', // GASのウェブアプリURL
+  TERMS_URL: '#',    // 利用規約のURL
+  PRIVACY_URL: '#',  // プライバシーポリシーのURL
+  MAX_SIDE: 1800,    // 送信画像の長辺(px)
+  JPEG_QUALITY: 0.85,
+  CONSENT_VERSION: '2026-11-20', // 同意文を変更したら日付を更新（シートに記録されます）
+};
+/* ================================== */
+
+const $ = id => document.getElementById(id);
+const form = $('form');
+const DOC_LABEL = { studentId: '学生証', gradProof: '卒業年度の証明' };
+const state = { images: {}, scans: {} };
+$('termsLink').href = CONFIG.TERMS_URL;
+$('privacyLink').href = CONFIG.PRIVACY_URL;
+
+// 卒業年度の選択肢
+(() => {
+  const now = new Date();
+  const base = now.getFullYear() + (now.getMonth() >= 3 ? 1 : 0);
+  const sel = $('gradYear');
+  sel.innerHTML = '<option value="">選択してください</option>';
+  for (let y = base - 1; y <= base + 4; y++) {
+    sel.insertAdjacentHTML('beforeend', `<option value="${y}">${y}年3月（${String(y).slice(2)}卒）</option>`);
+  }
+})();
+
+// 留年・休学・留学にチェック → 「卒業が遅くなった：はい」を提案
+document.querySelectorAll('input[name=status]').forEach(cb => cb.addEventListener('change', () => {
+  const picked = [...document.querySelectorAll('input[name=status]:checked')].map(x => x.value);
+  if (['留年', '休学', '留学'].some(v => picked.includes(v))) {
+    const yes = document.querySelector('input[name=delayed][value=yes]');
+    if (!document.querySelector('input[name=delayed]:checked')) yes.checked = true;
+  }
+}));
+
+function getForm() {
+  const fd = new FormData(form);
+  return {
+    name: (fd.get('name') || '').trim(),
+    kana: (fd.get('kana') || '').trim(),
+    university: (fd.get('university') || '').trim(),
+    faculty: (fd.get('faculty') || '').trim(),
+    gradYear: fd.get('gradYear') || '',
+    dob: fd.get('dob') || '',
+    gender: fd.get('gender') || '',
+    status: fd.getAll('status'),
+    delayedAnswer: fd.get('delayed') || '',
+    delayed: fd.get('delayed') === 'yes',
+    phone: (fd.get('phone') || '').replace(/[^\d]/g, ''),
+    email: (fd.get('email') || '').trim(),
+    industry: (fd.get('industry') || '').trim(),
+    location: (fd.get('location') || '').trim(),
+    concern: (fd.get('concern') || '').trim(),
+    consent: $('consent').checked,
+    consentPurpose: $('consentPurpose').checked,
+    consentVersion: CONFIG.CONSENT_VERSION,
+  };
+}
+
+function validate(f) {
+  const labels = { name:'氏名', kana:'フリガナ', university:'大学名', faculty:'学部・学科', gradYear:'卒業年度', dob:'生年月日', gender:'性別', delayedAnswer:'卒業時期の変更', phone:'電話番号', email:'メールアドレス' };
+  const miss = Object.keys(labels).filter(k => !f[k]);
+  if (miss.length) return '未入力：' + miss.map(k => labels[k]).join('、');
+  if (!/^[ァ-ヶー\s　]+$/.test(f.kana)) return 'フリガナは全角カタカナで入力してください';
+  if (!/^0\d{9,10}$/.test(f.phone)) return '電話番号の形式が正しくありません';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) return 'メールアドレスの形式が正しくありません';
+  if (!f.consent) return '個人情報の取り扱いへの同意が必要です';
+  if (!f.consentPurpose) return '参加目的の確認への同意が必要です';
+  return '';
+}
+
+const requiredDocs = () => getForm().delayed ? ['studentId', 'gradProof'] : ['studentId'];
+
+function go(n) {
+  [1,2,3,4].forEach(i => {
+    $('step' + i).classList.toggle('hidden', i !== n);
+    $('s' + i).classList.toggle('on', i <= n);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function loading(on, text) {
+  $('loading').classList.toggle('hidden', !on);
+  if (text) $('loadingText').textContent = text;
+}
+
+async function api(payload) {
+  const res = await fetch(CONFIG.GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライト回避
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || '通信エラー');
+  return json;
+}
+
+/* STEP1 → 2 */
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = getForm();
+  const msg = validate(f);
+  $('err1').textContent = msg;
+  if (msg) return;
+  $('proofBlock').classList.toggle('hidden', !f.delayed);
+  if (!f.delayed) delete state.images.gradProof;
+  state.scans = {};
+  refreshScanBtn();
+  go(2);
+});
+$('back1').onclick = () => go(1);
+
+/* 画像処理 */
+function compress(source) {
+  return new Promise((resolve, reject) => {
+    const draw = (img, w, h) => {
+      const scale = Math.min(1, CONFIG.MAX_SIDE / Math.max(w, h));
+      const c = document.createElement('canvas');
+      c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', CONFIG.JPEG_QUALITY));
+    };
+    if (source instanceof HTMLVideoElement) return draw(source, source.videoWidth, source.videoHeight);
+    const img = new Image();
+    img.onload = () => { draw(img, img.naturalWidth, img.naturalHeight); URL.revokeObjectURL(img.src); };
+    img.onerror = () => reject(new Error('画像を読み込めませんでした（JPEG/PNGでお試しください）'));
+    img.src = URL.createObjectURL(source);
+  });
+}
+const docEl = t => document.querySelector(`.doc[data-doc="${t}"]`);
+function setImage(type, dataUrl) {
+  state.images[type] = dataUrl;
+  delete state.scans[type];
+  const el = docEl(type);
+  el.querySelector('img').src = dataUrl;
+  el.querySelector('.preview').style.display = 'block';
+  el.classList.add('done');
+  $('err2').textContent = '';
+  refreshScanBtn();
+}
+function refreshScanBtn() {
+  $('btnScan').disabled = !requiredDocs().every(t => state.images[t]);
+}
+
+let target = 'studentId';
+async function onFile(e) {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try { setImage(target, await compress(file)); } catch (err) { $('err2').textContent = err.message; }
+}
+$('fileCapture').onchange = onFile;
+$('fileAlbum').onchange = onFile;
+
+/* ガイド枠カメラ（非対応端末は標準カメラにフォールバック） */
+let stream = null;
+async function openCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) return $('fileCapture').click();
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+    $('video').srcObject = stream;
+    document.querySelector('#cam .tip').textContent = target === 'studentId'
+      ? '枠内に学生証を合わせて撮影してください' : '書類全体が写るように撮影してください';
+    document.querySelector('#cam .frame').style.aspectRatio = target === 'studentId' ? '1.586' : '0.75';
+    $('cam').classList.remove('hidden');
+  } catch (err) {
+    $('fileCapture').click();
+  }
+}
+document.querySelectorAll('.doc').forEach(el => {
+  el.querySelector('[data-act=camera]').onclick = () => { target = el.dataset.doc; openCamera(); };
+  el.querySelector('[data-act=album]').onclick = () => { target = el.dataset.doc; $('fileAlbum').click(); };
+});
+function stopCam() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null;
+  $('cam').classList.add('hidden');
+}
+$('camCancel').onclick = stopCam;
+$('shutter').onclick = async () => {
+  const v = $('video');
+  if (!v.videoWidth) return;
+  const url = await compress(v);
+  stopCam();
+  setImage(target, url);
+};
+
+/* STEP2 → 3：読み取り */
+const BADGE = r => r.startsWith('一致') ? 'b-ok' : r === '不一致' ? 'b-ng' : r === '参考' ? 'b-gray' : 'b-warn';
+function resultRow(label, j) {
+  if (!j) return '';
+  return `<div class="result"><div><b>${label}</b><div class="note">${j.note || ''}</div></div><span class="badge ${BADGE(j.result)}">${j.result}</span></div>`;
+}
+$('btnScan').onclick = async () => {
+  const f = getForm();
+  const docs = requiredDocs();
+  const form = { name: f.name, gradYear: f.gradYear, dob: f.dob, delayed: f.delayed };
+  let html = '', texts = '', allOk = true;
+  try {
+    for (let i = 0; i < docs.length; i++) {
+      const t = docs[i];
+      loading(true, `${DOC_LABEL[t]}を読み取り中…（${i + 1}/${docs.length}・10秒ほど）`);
+      const res = await api({ action: 'scan', docType: t, image: state.images[t], form });
+      state.scans[t] = res.scanId;
+      const j = res.judge;
+      html += `<h3 class="rh">${DOC_LABEL[t]}</h3>`;
+      if (t === 'studentId') html += resultRow('氏名', j.name) + resultRow('生年月日', j.dob) + resultRow('卒業年度', j.grad);
+      else html += resultRow('卒業年度', j.grad) + resultRow('氏名', j.name);
+      Object.values(j).forEach(x => { if (x && !String(x.result).startsWith('一致') && x.result !== '参考') allOk = false; });
+      texts += `【${DOC_LABEL[t]}】\n${res.text || '（文字を読み取れませんでした）'}\n\n`;
+    }
+    $('results').innerHTML = html;
+    $('ocrText').textContent = texts;
+    $('judgeMsg').textContent = allOk
+      ? '書類と入力内容が一致しました。'
+      : '自動読み取りは完璧ではありません。「要確認」「不一致」の場合もそのまま送信できますが、後日スタッフが確認し、書類の再提出をお願いすることがあります。入力ミスがあれば戻って修正してください。';
+    $('err3').textContent = '';
+    go(3);
+  } catch (err) {
+    $('err2').textContent = '読み取りに失敗しました：' + err.message;
+  } finally { loading(false); }
+};
+$('btnRetake').onclick = () => go(2);
+
+/* STEP3 → 4：登録 */
+$('btnSubmit').onclick = async () => {
+  const f = getForm();
+  const msg = validate(f);
+  if (msg) { $('err3').textContent = msg; return; }
+  if (!requiredDocs().every(t => state.scans[t])) { $('err3').textContent = '書類をもう一度読み取ってください'; return; }
+  $('btnSubmit').disabled = true;
+  loading(true, '送信中…');
+  try {
+    await api({ action: 'register', scans: state.scans, form: f });
+    go(4);
+  } catch (err) {
+    $('err3').textContent = '送信に失敗しました：' + err.message;
+  } finally {
+    loading(false);
+    $('btnSubmit').disabled = false;
+  }
+};
+
+/* 別の学生を登録 */
+$('btnAgain').onclick = () => {
+  form.reset();
+  state.images = {}; state.scans = {};
+  document.querySelectorAll('.doc').forEach(el => {
+    el.classList.remove('done');
+    el.querySelector('.preview').style.display = 'none';
+  });
+  refreshScanBtn();
+  go(1);
+};
+</script>
+</body>
+</html>
