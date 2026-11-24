@@ -216,8 +216,8 @@
     <div class="card done">
       <div class="ic">✅</div>
       <h2>登録が完了しました</h2>
-      <p class="note">ご登録ありがとうございます。提出いただいた書類はスタッフが確認し、担当者より順次ご連絡します。<br>書類に不備があった場合は、こちらから再提出のご案内をお送りします。</p>
-      <button class="btn ghost" id="btnAgain">別の学生を登録する</button>
+      <p class="note">これで登録は完了です。ありがとうございました。<br>提出いただいた内容は、担当者が確認します。<br>書類の再提出が必要な場合は、担当者よりご連絡します。</p>
+      <p class="note">このページは閉じていただいて大丈夫です。</p>
     </div>
   </section>
 
@@ -456,17 +456,6 @@ $('btnScan').onclick = async () => {
   }
 };
 
-/* 別の学生を登録 */
-$('btnAgain').onclick = () => {
-  form.reset();
-  state.images = {}; state.scans = {};
-  document.querySelectorAll('.doc').forEach(el => {
-    el.classList.remove('done');
-    el.querySelector('.preview').style.display = 'none';
-  });
-  refreshScanBtn();
-  go(1);
-};
 </script>
 </body>
 </html>
