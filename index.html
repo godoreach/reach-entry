@@ -150,9 +150,10 @@
         <textarea name="concern" rows="3" placeholder="自由にご記入ください"></textarea>
 
         <div class="consent">
-          入力いただいた情報および証明書類（学生証等）の画像・確認結果は、運営会社である<b>合同会社Reach</b>が管理し、
+          入力いただいた情報は、運営会社である<b>合同会社Reach</b>が管理し、
           就職活動支援のため、提携する就活エージェントサービス・就活イベント運営会社に提供することがあります。
-          詳しくは<a href="#" id="termsLink" target="_blank" rel="noopener">利用規約</a>・<a href="#" id="privacyLink" target="_blank" rel="noopener">プライバシーポリシー</a>をご確認ください。
+          証明書類（学生証等）の画像と確認結果は、在籍・卒業予定年度の確認にのみ使用し、提携先には提供しません（画像は卒業予定年度の3月末を過ぎたら削除します）。
+          詳しくは<a href="#" id="privacyLink" target="_blank" rel="noopener">プライバシーポリシー</a>をご確認ください。
           <label><input type="checkbox" name="consent" id="consent">個人情報の取り扱いに同意する</label>
         </div>
 
@@ -241,11 +242,10 @@
 /* ===== 設定（ここだけ書き換え） ===== */
 const CONFIG = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbw2w0f3fQ94pCTtROefejOBPY9yrmv5DCEOVRNpFJR3KbdLTVjNViXbKdOxVIaBd2s/exec', // GASのウェブアプリURL
-  TERMS_URL: '#',    // 利用規約のURL
-  PRIVACY_URL: '#',  // プライバシーポリシーのURL
+  PRIVACY_URL: 'https://luxuriant-playground-838.notion.site/414ca4e3a4ff8076a44dc2ff48c53524', // プライバシーポリシー（Notion公開ページ）
   MAX_SIDE: 1800,    // 送信画像の長辺(px)
   JPEG_QUALITY: 0.85,
-  CONSENT_VERSION: '2026-11-20', // 同意文を変更したら日付を更新（シートに記録されます）
+  CONSENT_VERSION: '2026-11-25', // 同意文を変更したら日付を更新（シートに記録されます）
 };
 /* ================================== */
 
@@ -253,7 +253,6 @@ const $ = id => document.getElementById(id);
 const form = $('form');
 const DOC_LABEL = { studentId: '学生証', gradProof: '卒業年度の証明' };
 const state = { images: {}, scans: {} };
-$('termsLink').href = CONFIG.TERMS_URL;
 $('privacyLink').href = CONFIG.PRIVACY_URL;
 
 // 卒業年度の選択肢
